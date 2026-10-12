@@ -23,11 +23,11 @@ The goal is to accelerate the `knn_classifyinstance` function ([knn/src/knn.c](k
 
 ## Datasets
 
-The dataset files (`*.dat`) are **not stored in this repository** because they are too large for GitHub (`pamap2/train1.dat` alone is ~415 MB, and both datasets together come to about 1 GB).
+The dataset files (`*.dat`) are **not stored in this repository** because they are too large for GitHub.
 
 ### Where to get them
 
-The `.dat` files ship with the **JACA Benchmark Suite (HAR-kNN)** that the course provides alongside the project statement (see the course page on Moodle).
+The `.dat` files ship with the **JACA Benchmark Suite (HAR-kNN)** that the course provides alongside the project statement (see Teams).
 After downloading it, copy the files from each scenario folder into `data/`:
 
 | In the JACA Benchmark Suite | In this repo |
