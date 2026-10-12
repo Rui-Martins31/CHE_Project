@@ -1,2 +1,15 @@
 # Random files
 PROJECT_SUMMARY.md
+
+# Datasets (too large for git, see README.md)
+data/**/*.dat
+
+# Build outputs (folders kept with .gitkeep)
+knn/bin/*
+knn/build/*
+knn/run/*
+!.gitkeep
+gmon.out
+
+# macOS
+.DS_Store

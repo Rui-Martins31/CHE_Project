@@ -1,8 +1,8 @@
 #WISDM:
-#gcc -D K=3 -D DT=1 -D NUM_FEATURES=43 -D SCENARIO_FEATURES=1 -D READ=4 -D TRAIN_PATH=\"..\\scenario-wisdm\\train2_norm.dat\" -D TEST_PATH=\"..\\scenario-wisdm\\test2_notnorm.dat\" -D DIMEM=0 -D VERIFY=0 -D STREAMING=1 -O2 -Wall -Wextra -std=gnu99 src\knn.c src\utils.c src\timer.c src\io.c src\features.c src\main.c -I..\scenario-wisdm -o harknn -lm
+#gcc -D K=3 -D DT=1 -D NUM_FEATURES=43 -D SCENARIO_FEATURES=1 -D READ=4 -D TRAIN_PATH=\"..\\data\\wisdm\\train2_norm.dat\" -D TEST_PATH=\"..\\data\\wisdm\\test2_notnorm.dat\" -D DIMEM=0 -D VERIFY=0 -D STREAMING=1 -O2 -Wall -Wextra -std=gnu99 src\knn.c src\utils.c src\timer.c src\io.c src\features.c src\main.c -I..\data\wisdm -o harknn -lm
 #
 #PAMAP2:
-#gcc -D K=3 -D DT=1 NUM_FEATURES=90 -D SCENARIO_FEATURES=2 -D READ=4 -D TRAIN_PATH=\"..\\scenario-pamap2\\train2_norm.dat\" -D TEST_PATH=\"..\\scenario-pamap2\\test2_notnorm.dat\" -D DIMEM=0 -D VERIFY=0 -D STREAMING=1 -O2 -Wall -Wextra -std=gnu99 src\knn.c src\utils.c src\timer.c src\io.c src\features.c src\main.c -I..\scenario-wisdm -o harknn -lm
+#gcc -D K=3 -D DT=1 NUM_FEATURES=90 -D SCENARIO_FEATURES=2 -D READ=4 -D TRAIN_PATH=\"..\\data\\pamap2\\train2_norm.dat\" -D TEST_PATH=\"..\\data\\pamap2\\test2_notnorm.dat\" -D DIMEM=0 -D VERIFY=0 -D STREAMING=1 -O2 -Wall -Wextra -std=gnu99 src\knn.c src\utils.c src\timer.c src\io.c src\features.c src\main.c -I..\data\wisdm -o harknn -lm
 #
 
 # the following definitions are passed through gcc parameters
@@ -22,12 +22,8 @@
 #define SCENARIO_FEATURES 1 or 2
 #define NUM_FEATURES 43 or 90
 
-# the path to the JACABenchSuite: JBSPATH is a system variable 
-ifeq ($(OS),Windows_NT)
-JACAPATH ?= $(subst \,\\,$(JBSPATH))
-else
-JACAPATH ?= $(JBSPATH)
-endif
+# the path to the datasets folder (absolute, so the binary can run from any directory)
+DATA_DIR ?= $(abspath $(CURDIR)/../data)
 
 #variable can be overridden: wisdm or papmap2
 SCENARIO ?= wisdm
@@ -55,25 +51,22 @@ else
 	PATH_SEP = /
 endif
 
-JACASOURCES = $(JACAPATH)$(PATH_SEP)sources
-
 #scenario options
 ifeq ($(SCENARIO),wisdm)
-INCLUDES = ..$(PATH_SEP)scenario-wisdm
-HARKNNDATASET = $(JACASOURCES)$(PATH_SEP)har-knn$(PATH_SEP)scenario-wisdm
+HARKNNDATASET = $(DATA_DIR)$(PATH_SEP)wisdm
 NUM_FEATURES = 43
 SCENARIO_FEATURES = 1
 else
-INCLUDES = ..$(PATH_SEP)scenario-pamap2
-HARKNNDATASET = $(JACASOURCES)$(PATH_SEP)har-knn$(PATH_SEP)scenario-pamap2
+HARKNNDATASET = $(DATA_DIR)$(PATH_SEP)pamap2
 NUM_FEATURES = 90
 SCENARIO_FEATURES = 2
 endif
+INCLUDES = $(HARKNNDATASET)
 
 echo1:
-	@echo $(JACAPATH)
+	@echo $(DATA_DIR)
 echo2:
-	@echo $(JACASOURCES)
+	@echo $(HARKNNDATASET)
 echo3:
 	@echo $(INCLUDES)
 	
