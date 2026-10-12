@@ -1,10 +1,10 @@
 # Random files
 PROJECT_SUMMARY.md
 
-# Datasets (too large for git, see README.md)
+# Datasets
 data/**/*.dat
 
-# Build outputs (folders kept with .gitkeep)
+# Build outputs
 knn/bin/*
 knn/build/*
 knn/run/*
