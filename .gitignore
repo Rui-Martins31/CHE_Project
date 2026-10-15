@@ -13,3 +13,6 @@ gmon.out
 
 # macOS
 .DS_Store
+
+# Generated profiles (regenerate with scripts/profile.sh)
+results/profiling/
