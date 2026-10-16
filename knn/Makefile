@@ -32,6 +32,8 @@ K ?= 3
 DT ?= 1
 SPECIALIZED ?= 1
 USE_SQRT ?= 1
+# 1: sqrtf when DT=2 (float); 0: always sqrt (double)
+MATH_TYPE ?= 1
 
 READ ?= 4
 
@@ -93,7 +95,7 @@ CFLAGS = $(OPT) \
 	-D K=$(K) \
 	-D DT=$(DT) \
 	-D SPECIALIZED=$(SPECIALIZED) \
-	-D MATH_TYPE=1 \
+	-D MATH_TYPE=$(MATH_TYPE) \
 	-D DIST_METHOD=1 \
 	-D USE_SQRT=$(USE_SQRT) \
 	-D NUM_FEATURES=$(NUM_FEATURES) \
@@ -105,6 +107,10 @@ CFLAGS = $(OPT) \
 LDFLAGS = -lm
 
 PROFILING_FLAGS = -g -pg
+# MinGW-w64: with PIE/ASLR gprof reports an empty profile
+ifeq ($(OS),Windows_NT)
+PROFILING_FLAGS += -no-pie
+endif
 PROFILING = gprof -b
 
 #SRCS = knn.c utils.c timer.c io.c features.c main.c

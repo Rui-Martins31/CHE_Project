@@ -86,3 +86,62 @@ m = testing instances, n = training instances, d = features.
   The gcov counts are exact.
 - gprof does not count time inside the C library, so most of the file-reading time is missing from the profiles.
 - The timings come from instrumented (`-pg`) builds and are only indicative; checkpoint 1.2 measurements should use normal builds.
+
+## Code variants × GCC options (checkpoint 1.2)
+
+The aim is to measure execution time, accuracy, energy, power, clock frequency and the top-5 hotspots of every code variant compiled with every GCC option set.
+Everything is automated by [`scripts/experiments.py`](../scripts/experiments.py) (make calls, runs, measurements, profiling) and [`scripts/analyze.py`](../scripts/analyze.py) (tables and charts).
+
+### Experiment matrix
+
+| | Values |
+|---|---|
+| k | 3, 5, 20 |
+| Data type | double (`DT=1`), float (`DT=2`) |
+| Specialization | not specialized, specialized (`SPECIALIZED=1`, only k = 3) |
+| Square root | `sqrt` (`USE_SQRT=1 MATH_TYPE=0`), `sqrtf` (`MATH_TYPE=1`, float only), none (`USE_SQRT=0`) |
+| Optimisation level | `-Os`, `-O1`, `-O2`, `-O3`, `-Ofast`, `-O3 -fno-tree-vectorize`, `-O3 -fno-inline` |
+| Extra flags | none, `-march=native`, `-flto`, `-march=native -flto` |
+
+That is 20 code variants × 28 flag sets = 560 binaries per scenario, 1120 in total.
+`sqrtf` is only a separate variant for float: for double the code calls `sqrt` either way.
+The **baseline** is the original code: double, `sqrt`, specialized for k = 3, `-O2`.
+
+### Running
+
+From the repository root, in Git Bash, with the laptop **on AC power** and other programs closed:
+
+```sh
+pip install matplotlib gprof2dot              # once
+python scripts/experiments.py all             # build + run + profile + analyze (several hours)
+
+# or step by step / on a subset (every option of the script can filter):
+python scripts/experiments.py list  --scenario wisdm --k 3
+python scripts/experiments.py build --scenario wisdm
+python scripts/experiments.py run   --scenario wisdm --opt O2 O3 --extra "" native
+python scripts/experiments.py profile --scenario wisdm --opt O2
+python scripts/analyze.py
+```
+
+Every step skips work that is already done (binaries in `knn/bin/exp/`, CSVs in `results/experiments/raw/`), so an interrupted campaign continues where it stopped; `--force` redoes it.
+
+- **build** calls `make comp` with `K`, `DT`, `SPECIALIZED`, `USE_SQRT`, `MATH_TYPE`, `OPT` and `TARGET` for each variant, in parallel. Build logs sit next to each binary.
+- **run** runs each binary 1 + 10 times (1 warm-up, `--reps 10`) through [`scripts/measure.ps1`](../scripts/measure.ps1), in shuffled order so slow drifts (temperature, background load) spread over all variants.
+- **profile** builds with `make comprofiling` (`-g -pg`, plus `-no-pie` on Windows), runs 3 times and sums the `gmon.out` files (`gprof -s`), keeps the flat profile and call graph (`gprof.txt`), the top-5 functions (`top.csv`) and the call graph as `callgraph.dot` (gprof2dot; rendered to `callgraph.svg` when Graphviz `dot` is installed, otherwise open the `.dot` in <https://dreampuf.github.io/GraphvizOnline>).
+- **analyze** writes `summary.csv` (medians per variant, speedup and energy gain vs baseline), `hotspots.csv`, `summary.md` and the charts in `results/experiments/charts/`.
+
+### How time, energy, power and frequency are measured
+
+- **Time**: the program's own timer around the kNN loop (`Total execution time`), and the wall time of the whole process. The median of the 10 runs is reported.
+- **Energy**: the Windows *Energy Meter* performance counters, which expose Intel RAPL (`RAPL_Package0_PKG` = whole CPU package, `RAPL_Package0_PP0` = cores). They need no admin rights or drivers and refresh about every 8 ms.
+  `measure.ps1` polls them every ~3 ms during the run. The kNN loop is the last phase of the program, so the kNN energy is taken from the window [end − kNN time, end]. Whole-process energy is also kept (`pkg_J`).
+- **Power** = energy / time (package).
+- **Frequency**: the *Actual Frequency* counter of the logical CPU the program runs on, averaged over the kNN window.
+- The program is pinned to one P-core (logical CPU 12 by default, `--cpu`; P-cores of the Core Ultra 7 265H are 0, 1, 10–13) and runs at high priority. The measuring script pins itself to an E-core, so polling does not compete with the program.
+
+### Caveats
+
+- RAPL measures the whole package, so background activity is included. Keep the machine idle and compare medians.
+- With `-flto` most functions are inlined into `main`, so gprof shows `main` as the only hotspot. The `-O3 -fno-inline` builds show the real split.
+- `-Ofast` enables `-ffast-math`, which may change the accuracy; `summary.md` lists variants whose accuracy differs from the baseline.
+- `-march=native` on MinGW-w64 may produce AVX code that crashes (GCC cannot align the stack to 32 bytes on Windows x64). Crashes are recorded as `crashed` and shown as `×` in the heatmaps.
