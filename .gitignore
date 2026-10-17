@@ -16,3 +16,6 @@ gmon.out
 
 # Generated profiles (regenerate with scripts/profile.sh)
 results/profiling/
+
+# Python
+__pycache__/

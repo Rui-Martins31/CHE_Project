@@ -6,7 +6,8 @@
 #     SCENARIO: wisdm | pamap2   (default: wisdm)
 #     K:        3 | 5 | 7 | 20   (default: 3)
 #     DT:       1 = double, 2 = float (default: 1)
-#   Env overrides: OPT (default -O2), SPECIALIZED (1), USE_SQRT (1)
+#   Env overrides: OPT (default -O2), SPECIALIZED (1), USE_SQRT (1),
+#                  VTUNE (path to vtune; 0 = skip VTune)
 #
 # Outputs go to results/profiling/<scenario>_k<K>_<type>/:
 #   program_output.txt   - program stdout (accuracy, timings)
@@ -14,6 +15,9 @@
 #   gprof_O0.txt         - gprof at -O0, no inlining -> complete call graph
 #   gcov/*.gcov          - line-by-line execution counts (-O0 --coverage)
 #   gcov_summary.txt     - per-file / per-function coverage and branch summary
+#   vtune_summary.txt    - VTune hotspots summary (build with OPT -g, no -pg)
+#   vtune_hotspots.csv   - VTune per-function CPU time
+#   vtune_topdown.txt    - VTune call tree (compare with the gprof call graph)
 set -euo pipefail
 
 SCENARIO=${1:-wisdm}
@@ -75,6 +79,24 @@ done
 gcc --coverage "$GC"/*.o -o "$GC/harknn.exe" -lm
 ( cd "$GC" && ./harknn.exe > /dev/null )
 ( cd "$OUT/gcov" && gcov -b -c -f -o "$GC" "${SRCS[@]/#/$SRC/}" > "$OUT/gcov_summary.txt" )
+
+# VTune is a native Windows program: give it Windows paths (cygpath is absent on Linux).
+winpath() { cygpath -w "$1" 2>/dev/null || echo "$1"; }
+VTUNE=${VTUNE:-$(command -v vtune || echo "/c/Program Files (x86)/Intel/oneAPI/vtune/latest/bin64/vtune.exe")}
+if [ "$VTUNE" != 0 ] && [ -x "$VTUNE" ]; then
+  echo "== $SCENARIO k=$K $TYPE: VTune hotspots ($OPT -g)"
+  VT=$WORK/vtune
+  mkdir -p "$VT"
+  ( cd "$SRC" && gcc $OPT -g "${DEFS[@]}" "${SRCS[@]}" -o "$VT/harknn.exe" -lm )
+  R=$(winpath "$VT/r_hotspots")
+  ( cd "$VT" && "$VTUNE" -collect hotspots -r "$R" -- "$(winpath "$VT/harknn.exe")" > collect.log 2>&1 )
+  "$VTUNE" -report summary  -r "$R" -report-output "$(winpath "$OUT/vtune_summary.txt")"
+  "$VTUNE" -report hotspots -r "$R" -format csv -csv-delimiter comma \
+    -report-output "$(winpath "$OUT/vtune_hotspots.csv")"
+  "$VTUNE" -report top-down -r "$R" -report-output "$(winpath "$OUT/vtune_topdown.txt")"
+else
+  echo "== VTune not found, skipping (set VTUNE=/path/to/vtune)"
+fi
 
 echo "== done -> ${OUT#$ROOT/}"
 sed -n '/accuracy/p;/time/p' "$OUT/program_output.txt"
