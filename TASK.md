@@ -14,7 +14,8 @@ Rules that apply to every step:
 - [x] Reorganize the repository layout (`knn/`, `data/`, `docs/`, `scripts/`, `results/`)
 - [x] Makefile finds datasets in `../data` (no `JBSPATH` needed)
 - [x] Document where to get the datasets ([README.md](README.md))
-- [x] Script to run gprof and gcov ([scripts/profile.sh](scripts/profile.sh))
+- [x] Script to run gprof and gcov ([scripts/profile_gnu.py](scripts/profile_gnu.py))
+- [x] Script to run VTune and Advisor ([scripts/profile_intel.py](scripts/profile_intel.py))
 
 ## Checkpoint 1: multicore CPU (PC/desktop/laptop)
 
@@ -26,8 +27,8 @@ Use both scenarios: WISDM and PAMAP2 (K = 3, 5, 20; float and double).
 - [x] gcov: line execution counts, 12 configurations ([results/README.md](results/README.md))
 - [x] Identify the hotspots (distance loop in `get_*_NN`; `select_k_nearest` for large k)
 - [x] Call graph (text version in [results/README.md](results/README.md))
-- [ ] Intel VTune: hotspots analysis (compare with gprof)
-- [ ] Intel Advisor: roofline of the original code
+- [x] Intel VTune: hotspots analysis (compare with gprof) ([results/README.md](results/README.md))
+- [ ] Intel Advisor: roofline of the original code (empty on Windows/MinGW, rerun under WSL; see [results/README.md](results/README.md))
 - [ ] Call graph as a figure for the report, decorated with calls and % time
 - [ ] Draw the task graph, decorated with data sizes and dependencies
 - [ ] Select and justify the code regions to migrate to a hardware accelerator
