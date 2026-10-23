@@ -1,0 +1,20 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  us/call  us/call  name    
+ 81.48      0.22     0.22     3163    69.55    79.04  get_k_NN
+ 11.11      0.25     0.03     3163     9.48     9.48  select_k_nearest
+  7.41      0.27     0.02                             _init
+  0.00      0.27     0.00     3163     0.00     0.00  copy_k_nearest
+  0.00      0.27     0.00     3163     0.00    79.04  knn_classifyinstance
+  0.00      0.27     0.00     3163     0.00     0.00  minmax_normalize_point
+  0.00      0.27     0.00     3163     0.00     0.00  plurality_voting
+  0.00      0.27     0.00     3163     0.00     0.00  put
+  0.00      0.27     0.00        2     0.00     0.00  read_data_points
+  0.00      0.27     0.00        1     0.00     0.00  timer_destroy
+  0.00      0.27     0.00        1     0.00     0.00  timer_get_ms
+  0.00      0.27     0.00        1     0.00     0.00  timer_get_s
+  0.00      0.27     0.00        1     0.00     0.00  timer_init
+  0.00      0.27     0.00        1     0.00     0.00  timer_start
+  0.00      0.27     0.00        1     0.00     0.00  timer_stop

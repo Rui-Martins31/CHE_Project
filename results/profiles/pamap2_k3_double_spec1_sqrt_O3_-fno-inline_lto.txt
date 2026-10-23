@@ -1,0 +1,18 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  us/call  us/call  name    
+ 53.33      0.08     0.08     1008    79.37    79.37  get_3_NN.constprop.0
+ 46.67      0.15     0.07                             io.c.05b25da2
+  0.00      0.15     0.00     1009     0.00     0.00  copy_3_nearest
+  0.00      0.15     0.00     1008     0.00    79.37  knn_classifyinstance_3.constprop.0
+  0.00      0.15     0.00     1008     0.00     0.00  minmax_normalize_point.constprop.0
+  0.00      0.15     0.00     1008     0.00     0.00  plurality_voting_3
+  0.00      0.15     0.00     1008     0.00     0.00  put.constprop.0
+  0.00      0.15     0.00     1008     0.00     0.00  select_3_nearest.constprop.0
+  0.00      0.15     0.00        3     0.00     0.00  timer_get_s
+  0.00      0.15     0.00        2     0.00     0.00  timer_init
+  0.00      0.15     0.00        1     0.00     0.00  timer_get_ms
+  0.00      0.15     0.00        1     0.00     0.00  timer_start
+  0.00      0.15     0.00        1     0.00     0.00  timer_stop
