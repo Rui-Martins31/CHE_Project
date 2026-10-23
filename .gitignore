@@ -70,3 +70,5 @@ coverage.xml
 *.njsproj
 *.sln
 *.sw?
+
+results/profiling/
