@@ -1,0 +1,7 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 96.77      0.30     0.30                             utils.c.64365c91
+  3.23      0.31     0.01        2     5.00     5.00  read_data_points

@@ -1,0 +1,8 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  Ts/call  Ts/call  name    
+ 92.42      0.61     0.61                             timer.c.df7cbaa3
+  7.58      0.66     0.05                             utils.c.396a03cd
+  0.00      0.66     0.00        2     0.00     0.00  frame_dummy

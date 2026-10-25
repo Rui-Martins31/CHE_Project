@@ -1,0 +1,8 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  Ts/call  Ts/call  name    
+ 85.19      0.23     0.23                             timer.c.df7cbaa3
+ 14.81      0.27     0.04                             io.c.fdb42dc7
+  0.00      0.27     0.00        2     0.00     0.00  read_data_points

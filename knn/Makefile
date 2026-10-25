@@ -32,6 +32,8 @@ K ?= 3
 DT ?= 1
 SPECIALIZED ?= 1
 USE_SQRT ?= 1
+# 0: sqrt/fabs; 1: sqrtf/fabsf when DT is float
+MATH_TYPE ?= 1
 
 READ ?= 4
 
@@ -93,7 +95,7 @@ CFLAGS = $(OPT) \
 	-D K=$(K) \
 	-D DT=$(DT) \
 	-D SPECIALIZED=$(SPECIALIZED) \
-	-D MATH_TYPE=1 \
+	-D MATH_TYPE=$(MATH_TYPE) \
 	-D DIST_METHOD=1 \
 	-D USE_SQRT=$(USE_SQRT) \
 	-D NUM_FEATURES=$(NUM_FEATURES) \
