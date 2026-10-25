@@ -99,10 +99,18 @@ def run_to_file(cmd, path, cwd=None):
         run(cmd, cwd=cwd, stdout=f)
 
 
+# def build(cfg, exe, flags):
+#     """Compile all sources into exe with the given extra flags."""
+#     exe.parent.mkdir(parents=True, exist_ok=True)
+#     run(["gcc", *flags, *cfg.defs(), *SRCS, "-o", exe, "-lm"], cwd=SRC)
+
 def build(cfg, exe, flags):
     """Compile all sources into exe with the given extra flags."""
     exe.parent.mkdir(parents=True, exist_ok=True)
-    run(["gcc", *flags, *cfg.defs(), *SRCS, "-o", exe, "-lm"], cwd=SRC)
+    # -no-pie disables ASLR relocation so binary instrumentation engines don't lose addresses
+    # -Wl,--export-all-symbols forces function/loop symbol visibility in the PE binary header
+    windows_flags = ["-no-pie", "-Wl,--export-all-symbols"] if IS_WINDOWS else []
+    run(["gcc", *flags, *windows_flags, *cfg.defs(), *SRCS, "-o", exe, "-lm"], cwd=SRC)
 
 
 def clean(folder, patterns):
