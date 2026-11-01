@@ -131,4 +131,34 @@ The gprof columns are from the summary table above.
 
 ## Roofline with Intel Advisor (checkpoint 1.1)
 
+### Viewing the figures on Windows (TO BE REVIEWED)
+
+The repository does not contain an existing command for opening Advisor's HTML reports in Microsoft Edge or rendering the Graphviz diagrams. Run these commands from the repository root in PowerShell.
+
+To open an Advisor roofline report in Microsoft Edge (adjust the configuration folder as needed):
+
+```powershell
+$edge = "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
+$report = (Resolve-Path "results\profiling\wisdm_k3_float\advisor_roofline.html").Path
+Start-Process $edge -ArgumentList $report
+```
+
+Graphviz must be installed and its `bin` directory must be on `PATH` for the `dot` command to work. After installing it, open a new PowerShell window and render the `.dot` sources to SVG:
+
+Save `.dot` files as UTF-8 without a byte-order mark (BOM); Graphviz may reject a BOM at the start of the file as an unexpected character.
+
+```powershell
+dot -Tsvg results/figures/call_graph_wisdm_k3_float.dot -o results/figures/call_graph_wisdm_k3_float.svg
+dot -Tsvg results/figures/task_graph_knn.dot -o results/figures/task_graph_knn.svg
+```
+
+Open the resulting SVGs in Edge:
+
+```powershell
+$edge = "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
+Start-Process $edge -ArgumentList (Resolve-Path "results\figures\call_graph_wisdm_k3_float.svg").Path
+Start-Process $edge -ArgumentList (Resolve-Path "results\figures\task_graph_knn.svg").Path
+```
+
+
 

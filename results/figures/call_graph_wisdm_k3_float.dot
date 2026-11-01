@@ -1,0 +1,24 @@
+digraph CallGraph {
+  graph [rankdir=TB, labelloc=t, label="Call graph: WISDM, K=3, float\nCall counts: -O0 -fno-inline; time shares: -O2 profile summary", fontname="Arial", fontsize=16, nodesep=0.35, ranksep=0.55];
+  node [shape=box, style="rounded,filled", fillcolor="#eef4fb", color="#52769b", fontname="Arial", fontsize=10];
+  edge [fontname="Arial", fontsize=9, color="#52616b", arrowsize=0.8];
+  main [label="main\ncalls: 1\ntime: 100% (root)"];
+  norm [label="minmax_normalize_point\ncalls: 3,163\ntime: 0% (rounded)"];
+  classify [label="knn_classifyinstance_3\ncalls: 3,163\ntime: 100% inclusive kNN path"];
+  dist [label="get_3_NN\ncalls: 3,163\ntime: 91% of kNN time", fillcolor="#ffd98a", color="#b47a00"];
+  select [label="select_3_nearest\ncalls: 3,163\ntime: 9% of kNN time", fillcolor="#ffe9bb", color="#b47a00"];
+  copy [label="copy_3_nearest\ncalls: 3,163\ntime: <1% (rounded)"];
+  vote [label="plurality_voting_3\ncalls: 3,163\ntime: <1% (rounded)"];
+  put [label="put\ncalls: 3,163\ntime: <1% (rounded)"];
+  main -> norm [label="3,163"];
+  main -> classify [label="3,163"];
+  main -> put [label="3,163"];
+  classify -> dist [label="3,163"];
+  classify -> vote [label="3,163"];
+  dist -> select [label="3,163"];
+  dist -> copy [label="3,163"];
+  {rank=same; norm; classify; put}
+  {rank=same; dist; vote}
+  note [shape=note, fillcolor="#fff", color="#999", label="Percentages for get_3_NN and select_3_nearest use the README -O2 kNN summary (91% / 9%). Other small functions round to 0% at this precision.\nEdge labels are dynamic call counts from gprof_O0.txt."];
+  note -> main [style=dotted, arrowhead=none];
+}

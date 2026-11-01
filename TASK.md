@@ -29,8 +29,8 @@ Use both scenarios: WISDM and PAMAP2 (K = 3, 5, 20; float and double).
 - [x] Call graph (text version in [results/README.md](results/README.md))
 - [x] Intel VTune: hotspots analysis (compare with gprof) ([results/README.md](results/README.md))
 - [ ] Intel Advisor: roofline of the original code (empty on Windows/MinGW, rerun under WSL; see [results/README.md](results/README.md))
-- [ ] Call graph as a figure for the report, decorated with calls and % time
-- [ ] Draw the task graph, decorated with data sizes and dependencies
+- [x] Call graph as a figure for the report, decorated with calls and % time ([SVG](results/figures/call_graph_wisdm_k3_float.svg), [DOT source](results/figures/call_graph_wisdm_k3_float.dot))
+- [x] Draw the task graph, decorated with data sizes and dependencies ([SVG](results/figures/task_graph_knn.svg), [DOT source](results/figures/task_graph_knn.dot))
 - [ ] Select and justify the code regions to migrate to a hardware accelerator
 
 ### 1.2 Characterize code versions with gcc flags

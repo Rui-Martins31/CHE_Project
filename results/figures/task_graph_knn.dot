@@ -1,0 +1,18 @@
+digraph TaskGraph {
+  graph [rankdir=LR, labelloc=t, label="One-instance kNN task graph and data dependencies", fontname="Arial", fontsize=16, nodesep=0.45, ranksep=0.65, compound=true];
+  node [shape=box, style="rounded,filled", fontname="Arial", fontsize=10, color="#52769b", fillcolor="#eef4fb"];
+  edge [fontname="Arial", fontsize=9, color="#52616b", arrowsize=0.8];
+  training [label="Training set\nn × d features", shape=cylinder, fillcolor="#e5f2e5", color="#558255"];
+  instance [label="Test instance\nd features", shape=note, fillcolor="#e5f2e5", color="#558255"];
+  distance [label="Distance computation\ncompare instance with all n training points"];
+  selection [label="Select k nearest\nretain k (distance, class ID) pairs"];
+  vote [label="Plurality vote\nproduce one class ID"];
+  store [label="Store / emit result\none class ID", shape=box3d];
+  training -> distance [label="Training feature matrix:\nWISDM 1,269,876 B (float), 2,539,752 B (double)\nPAMAP2 2,226,960 B (float), 4,453,920 B (double)"];
+  instance -> distance [label="Test vector (d × element size):\nWISDM 172 B (float), 344 B (double)\nPAMAP2 360 B (float), 720 B (double)"];
+  distance -> selection [label="n distances (n × element size):\nWISDM 29,532 B (float), 59,064 B (double)\nPAMAP2 24,744 B (float), 49,488 B (double)"];
+  selection -> vote [label="k (distance, class ID) pairs;\nfor K=3: WISDM/PAMAP2, 15 B (float) or 27 B (double)\n(class ID is int8_t)"];
+  vote -> store [label="1 class ID = 1 B (int8_t)"];
+  parallel [shape=plaintext, label="Repeat independently for each test instance: the training set is shared read-only; no instance depends on another.\nThis loop exposes parallelism across instances for OpenMP (subject to the streaming input schedule).", fontname="Arial", fontsize=10];
+  parallel -> instance [style=dashed, arrowhead=none];
+}
