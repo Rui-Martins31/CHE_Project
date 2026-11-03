@@ -22,8 +22,9 @@
 #define SCENARIO_FEATURES 1 or 2
 #define NUM_FEATURES 43 or 90
 
-# the path to the datasets folder (absolute, so the binary can run from any directory)
-DATA_DIR ?= $(abspath $(CURDIR)/../data)
+# Path to the datasets. Avoid $(abspath): GnuWin32 make 3.81 treats "C:/..."
+# as relative and prefixes the current directory again. ".." is fine for gcc and fopen.
+DATA_DIR ?= $(CURDIR)/../data
 
 #variable can be overridden: wisdm or papmap2
 SCENARIO ?= wisdm
@@ -36,6 +37,9 @@ USE_SQRT ?= 1
 MATH_TYPE ?= 1
 
 READ ?= 4
+
+# Queries classified in one pass over the training set.
+KNN_BATCH ?= 256
 
 #compiler optimizations
 OPT ?= -O2
@@ -90,6 +94,7 @@ TARGET = $(BIN_DIR)$(PATH_SEP)$(PROGNAME)
 
 CC = gcc
 CFLAGS = $(OPT) \
+	-fopenmp \
 	-I$(INCLUDES) \
 	-Wall -Wextra -std=gnu99 \
 	-D K=$(K) \
@@ -101,10 +106,11 @@ CFLAGS = $(OPT) \
 	-D NUM_FEATURES=$(NUM_FEATURES) \
 	-D SCENARIO_FEATURES=$(SCENARIO_FEATURES) \
 	-D READ=$(READ) -D DIMEM=0 -D VERIFY=0 -D STREAMING=1 -D NORMALIZE=1 \
+	-D KNN_BATCH=$(KNN_BATCH) \
 	-D TRAIN_PATH=\"$(TRAIN_PATH)\" \
 	-D TEST_PATH=\"$(TEST_PATH)\"
 
-LDFLAGS = -lm
+LDFLAGS = -lm -fopenmp
 
 PROFILING_FLAGS = -g -pg
 PROFILING = gprof -b

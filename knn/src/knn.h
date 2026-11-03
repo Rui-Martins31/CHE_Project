@@ -4,7 +4,7 @@
 *	Versions
 *	- v1.0, January 2025 (from previous versions)
 *
-*	by João MP Cardoso
+*	by Joï¿½o MP Cardoso
 *	Email: jmpc@fe.up.pt
 *
 *	SPeCS, FEUP.DEI, University of Porto, Portugal
@@ -24,6 +24,10 @@
 #include <stdlib.h>
 #endif
 
+#ifndef KNN_BATCH
+#define KNN_BATCH 256
+#endif
+
 #if SPECIALIZED == 1 && K == 3
 void copy_3_nearest(BestPoint *dist_points, BestPoint *best_points);
 
@@ -35,6 +39,8 @@ CLASS_ID_TYPE plurality_voting_3(BestPoint *best_points);
 
 CLASS_ID_TYPE knn_classifyinstance_3(Point *new_point, Point *known_points, int num_points, int num_features);
 
+void knn_classify_batch_3(Point *new_points, int nbatch, Point *known_points, int num_points, int num_features, CLASS_ID_TYPE *classes);
+
 #else
 void copy_k_nearest(BestPoint *dist_points, BestPoint *best_points, K_TYPE k);
 
@@ -45,6 +51,8 @@ void get_k_NN(Point *new_point, Point *known_points, int num_points, BestPoint *
 CLASS_ID_TYPE plurality_voting(K_TYPE k, BestPoint *best_points, int num_classes);
 
 CLASS_ID_TYPE knn_classifyinstance(Point *new_point, K_TYPE k, int num_classes, Point *known_points, int num_points, int num_features);
+
+void knn_classify_batch(Point *new_points, int nbatch, K_TYPE k, int num_classes, Point *known_points, int num_points, int num_features, CLASS_ID_TYPE *classes);
 #endif	
 
 #endif

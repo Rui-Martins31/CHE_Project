@@ -92,6 +92,8 @@
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <omp.h>
 
 #include "params.h"
 #include "types.h"
@@ -162,6 +164,9 @@
 
 int main() {
 
+	if (getenv("OMP_NUM_THREADS") == NULL)
+		omp_set_num_threads(16);
+
 	const K_TYPE k = K;
 	const int num_features = NUM_FEATURES;
     const int num_classes = NUM_CLASSES;
@@ -228,43 +233,45 @@ int main() {
 	// instances arriving as streaming data.
 	// Here assume that the loop below needs to run in serial mode and the
 	// value of num_new_points is just to test
-    for (int i = 0; i < num_new_points; i++) {
-		
-		// get instance to classify
-		// in a streaming implementation this might be something like:
-		// get(new_point);
-		Point *new_point = &new_points[i];	
-		
-		#if STREAMING == 1 
-		// normalize the point to classify
-		minmax_normalize_point(min, max, new_point, num_features);
-		#endif
-		
-		// classify
+    // Classify KNN_BATCH instances per parallel pass over the training set.
+    // Classes are still emitted in arrival order. This waits for a batch
+    // before classifying, so it is not one-instance-at-a-time streaming.
+    for (int i = 0; i < num_new_points; ) {
+		int nbatch = num_new_points - i;
+		if (nbatch > KNN_BATCH)
+			nbatch = KNN_BATCH;
+
+		for (int t = 0; t < nbatch; t++) {
+			Point *new_point = &new_points[i + t];
+			#if STREAMING == 1
+			minmax_normalize_point(min, max, new_point, num_features);
+			#endif
+		}
+
+		CLASS_ID_TYPE classes[KNN_BATCH];
 		#if SPECIALIZED == 1 && K == 3
-        CLASS_ID_TYPE instance_class = knn_classifyinstance_3(new_point,
-                                       known_points, num_known_points, num_features);
+		knn_classify_batch_3(&new_points[i], nbatch,
+			known_points, num_known_points, num_features, classes);
 		#else
-        CLASS_ID_TYPE instance_class = knn_classifyinstance(new_point, k, num_classes,
-                                       known_points, num_known_points, num_features);
+		knn_classify_batch(&new_points[i], nbatch, k, num_classes,
+			known_points, num_known_points, num_features, classes);
 		#endif
-	
-		#if ACCURACY
-			if(new_point->classification_id != instance_class) fail++;
-		#endif
-		
-        // The following store the inferred class in the point structure
-        // In practice and especially in streaming operation, this
-        // may not be done and the class is output to the subsequent
-        // stages of the application
-        // For now this is used to verify the results by comparing
-        // the class obtained for each point to a golden class
-		// for now: output the inferred class of the instance
-		put(&instance_class, 0, "class id:"); // 0 is the id used for char
-		
-		#if STREAMING == 0 // store the inferred class: we don't need the label anymore
-		new_point->classification_id = instance_class;
-		#endif
+
+		for (int t = 0; t < nbatch; t++) {
+			Point *new_point = &new_points[i + t];
+			CLASS_ID_TYPE instance_class = classes[t];
+
+			#if ACCURACY
+				if(new_point->classification_id != instance_class) fail++;
+			#endif
+
+			put(&instance_class, 0, "class id:"); // 0 is the id used for char
+
+			#if STREAMING == 0
+			new_point->classification_id = instance_class;
+			#endif
+		}
+		i += nbatch;
     }
 
 	#if TIMING == 1
